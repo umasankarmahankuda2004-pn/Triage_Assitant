@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab Technician Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #007bff, #00c6ff);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .logout {
+            color: white;
+            text-decoration: none;
+            background: red;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-left: 15px;
+        }
+
+        .logout:hover {
+            background: darkred;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Container */
+        .container {
+            text-align: center;
+        }
+
+        .container h3 {
+            margin-bottom: 30px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            width: 220px;
+            padding: 15px;
+            margin: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn1 {
+            background: #28a745;
+        }
+
+        .btn2 {
+            background: #17a2b8;
+        }
+
+        .btn3 {
+            background: #ffc107;
+            color: black;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<header class="navbar">
+    <h2>Lab Tech Dashboard</h2>
+    <div style="display: flex; align-items: center;">
+        <span style="font-size: 1.1rem;">Hello, <strong>{{ session.get('name') }}</strong></span>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <h3>Select an Action</h3>
+
+    <!-- Upload Report -->
+    <a href="{{ url_for('report_upload.report_upload') }}" class="btn btn1">
+        Upload Report
+    </a>
+</div>
+
+</body>
+</html>

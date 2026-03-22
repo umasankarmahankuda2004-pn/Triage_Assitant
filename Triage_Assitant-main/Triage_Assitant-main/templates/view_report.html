@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Reports</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #eef2f7;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.navbar h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+/* Container */
+.container {
+    padding: 30px;
+}
+
+/* Search + Filters */
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    width: 300px;
+    padding: 12px 40px 12px 20px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Clear button */
+.clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: bold;
+    color: #888;
+}
+
+/* Dropdown */
+select {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th {
+    background: #34495e;
+    color: white;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+/* Button */
+.btn {
+    padding: 8px 12px;
+    background: #3498db;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+/* Pagination */
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 3px;
+    border: none;
+    background: #3498db;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* No Data */
+.no-data {
+    text-align: center;
+    padding: 20px;
+    color: red;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <h2>📂 View Reports</h2>
+    <a href="{{ url_for('doctor_dashboard') }}" style="color:white; text-decoration:none; font-weight:bold; font-size:1.1rem;">⬅ Back to Dashboard</a>
+</header>
+
+<div class="container">
+
+    <!-- Search + Filters -->
+    <div class="search-container">
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Search..." onkeyup="applyFilters()">
+            <span class="clear-btn" onclick="clearSearch()">✖</span>
+        </div>
+
+        <select id="genderFilter" onchange="applyFilters()">
+            <option value="">All Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+
+        <select id="diseaseFilter" onchange="applyFilters()">
+            <option value="">All Disease</option>
+            {% for r in reports %}
+            <option value="{{ r.disease_name }}">{{ r.disease_name }}</option>
+            {% endfor %}
+        </select>
+
+    </div>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Disease</th>
+                <th>Report</th>
+            </tr>
+        </thead>
+
+        <tbody id="tableBody">
+            {% for r in reports %}
+            <tr class="report-row">
+                <td>{{ r.patient_id }}</td>
+                <td>{{ r.patient_name }}</td>
+                <td>{{ r.age }}</td>
+                <td>{{ r.gender }}</td>
+                <td>{{ r.disease_name }}</td>
+                <td>
+                    <a href="{{ url_for('static', filename='uploads/' + r.file_path) }}" target="_blank" class="btn">
+    View
+</a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            <!-- 🚫 No Results Row -->
+            <tr id="noResultsRow" style="display:none;">
+                <td colspan="6" class="no-data">No record found</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+
+</div>
+
+<script>
+let rows = Array.from(document.querySelectorAll(".report-row"));
+let perPage = 5;
+let currentPage = 1;
+
+// Apply Filters
+function applyFilters() {
+    let search = document.getElementById("searchInput").value.toLowerCase();
+    let gender = document.getElementById("genderFilter").value.toLowerCase();
+    let disease = document.getElementById("diseaseFilter").value.toLowerCase();
+    let noResultsRow = document.getElementById("noResultsRow");
+
+    let visibleRows = [];
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        let genderText = row.children[3].innerText.toLowerCase();
+        let diseaseText = row.children[4].innerText.toLowerCase();
+
+        if (
+            text.includes(search) &&
+            (gender === "" || genderText === gender) &&
+            (disease === "" || diseaseText === disease)
+        ) {
+            row.style.display = "";
+            visibleRows.push(row);
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    // No results handling
+    if (visibleRows.length === 0) {
+        noResultsRow.style.display = "";
+    } else {
+        noResultsRow.style.display = "none";
+    }
+
+    currentPage = 1;
+    setupPagination(visibleRows);
+}
+
+// Clear search
+function clearSearch() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("genderFilter").value = "";
+    document.getElementById("diseaseFilter").value = "";
+    applyFilters();
+}
+
+// Pagination
+function setupPagination(filteredRows = rows) {
+    let pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    let pageCount = Math.ceil(filteredRows.length / perPage);
+
+    filteredRows.forEach((row, index) => {
+        row.style.display = (index >= (currentPage-1)*perPage && index < currentPage*perPage) ? "" : "none";
+    });
+
+    for (let i = 1; i <= pageCount; i++) {
+        let btn = document.createElement("button");
+        btn.innerText = i;
+        btn.onclick = () => {
+            currentPage = i;
+            setupPagination(filteredRows);
+        };
+        pagination.appendChild(btn);
+    }
+}
+
+// Initial load
+applyFilters();
+</script>
+
+</body>
+</html>
